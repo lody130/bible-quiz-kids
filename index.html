@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🐑 어린이 성경퀴즈 🐑</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Jua&family=Gaegu:wght@400;700&display=swap');
+  * { margin:0; padding:0; box-sizing:border-box; font-family:'Jua','Gaegu','Malgun Gothic',sans-serif; }
+  body {
+    min-height:100vh;
+    background: linear-gradient(135deg,#ffd3e0 0%,#ffe9a8 30%,#a8e6ff 70%,#c4f0d0 100%);
+    background-attachment:fixed;
+    display:flex; align-items:center; justify-content:center;
+    padding:16px; overflow-x:hidden; color:#5a4a42;
+  }
+  .cloud { position:fixed; font-size:46px; opacity:.55; animation:float 9s ease-in-out infinite; pointer-events:none; z-index:0;}
+  @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-22px)} }
+
+  .card {
+    position:relative; z-index:1;
+    width:100%; max-width:560px;
+    background:rgba(255,255,255,0.97);
+    border-radius:34px;
+    box-shadow:0 20px 55px rgba(255,140,170,0.35);
+    padding:22px 22px 24px; text-align:center;
+    border:5px solid #fff;
+  }
+  h1 { font-size:32px; color:#ff7aa8; margin-bottom:6px; text-shadow:2px 2px 0 #fff3; }
+  .subtitle { font-size:16px; color:#b69; margin-bottom:22px; }
+
+  .mode-list { display:grid; gap:14px; margin-top:8px; }
+  .mode-btn {
+    font-size:21px; font-family:inherit; color:#fff; border:none;
+    border-radius:22px; padding:18px; cursor:pointer;
+    box-shadow:0 7px 0 rgba(0,0,0,0.12); transition:transform .1s, box-shadow .1s;
+    display:flex; align-items:center; justify-content:center; gap:10px;
+  }
+  .mode-btn:active { transform:translateY(5px); box-shadow:0 2px 0 rgba(0,0,0,0.12); }
+  .mode-btn .big { font-size:30px; }
+  .m-book{ background:linear-gradient(135deg,#ff8fb1,#ff5e95); }
+  .m-yu  { background:linear-gradient(135deg,#ffb36b,#ff9a3d); }
+  .m-cho { background:linear-gradient(135deg,#6bc6ff,#4aa8ff); }
+  .mode-sub { font-size:13px; opacity:.95; display:block; margin-top:3px; }
+
+  .sec-title { font-size:20px; color:#7a66ff; margin:18px 0 10px; }
+  .sec-title.nt { color:#3cc488; }
+  .book-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+  .book-btn {
+    font-size:16px; font-family:inherit; color:#5a4a42;
+    background:#fff7ec; border:3px solid #ffd9a8; border-radius:16px;
+    padding:14px 6px; cursor:pointer; transition:transform .1s, background .2s;
+  }
+  .book-btn:hover { transform:translateY(-3px) scale(1.04); background:#fff0d6; }
+  .book-btn .be { font-size:24px; display:block; margin-bottom:4px; }
+  .book-btn.nt { border-color:#b7ecd2; background:#f1fff8; }
+  .book-btn.nt:hover { background:#e1fbef; }
+
+  .topbar { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; font-size:18px; color:#888;}
+  .star-score { color:#ffac33; }
+  .progress-wrap { height:14px; background:#f1eef0; border-radius:12px; overflow:hidden; margin-bottom:10px; border:2px solid #fff;}
+  .progress-bar { height:100%; width:0%; background:linear-gradient(90deg,#ffd86b,#ff9a3d); transition:width .4s ease;}
+  .quiz-head { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:8px; }
+  .quiz-title { font-size:18px; color:#ff7aa8; text-align:left; flex:1; }
+  .exit-btn {
+    flex-shrink:0; font-size:14px; font-family:inherit; color:#b69;
+    background:#fff; border:2px solid #ffd0e0; border-radius:12px;
+    padding:7px 12px; cursor:pointer; white-space:nowrap;
+  }
+  .exit-btn:active { background:#ffe9f0; }
+
+  .mascot { font-size:38px; margin-bottom:2px; animation:bob 2s ease-in-out infinite; }
+  @keyframes bob { 0%,100%{transform:translateY(0) rotate(-4deg)} 50%{transform:translateY(-8px) rotate(4deg)} }
+
+  .question {
+    font-size:22px; color:#5a4a42; background:#fff6da;
+    border-radius:22px; padding:14px 16px; margin:4px 0 12px; line-height:1.4;
+    min-height:52px; display:flex; align-items:center; justify-content:center;
+    border:3px dashed #ffd479;
+  }
+  .q-emoji { font-size:34px; display:block; margin-bottom:6px; }
+
+  .options { display:grid; gap:9px; }
+  .opt {
+    font-size:19px; font-family:inherit; color:#5a4a42;
+    background:#fff; border:3px solid #cdeafe; border-radius:16px;
+    padding:13px; cursor:pointer; transition:transform .12s, background .2s, border-color .2s;
+  }
+  .opt:hover:not(:disabled){ transform:translateY(-3px) scale(1.02); border-color:#6bbcff; background:#eef7ff; }
+  .opt:disabled { cursor:default; }
+  .opt.correct { background:#d7f7cf; border-color:#5fd07a; color:#2e8b3d; }
+  .opt.wrong   { background:#ffe0e6; border-color:#ff8aa0; color:#d24a66; }
+
+  .feedback { margin-top:10px; font-size:18px; min-height:24px; line-height:1.45;}
+  .feedback.good { color:#3aa454; }
+  .feedback.bad  { color:#ef6e86; }
+
+  .next-btn, .play-btn {
+    margin-top:12px; font-size:19px; font-family:inherit; color:#fff;
+    background:linear-gradient(135deg,#ff9ab0,#ff6f96); border:none;
+    border-radius:18px; padding:12px 30px; cursor:pointer;
+    box-shadow:0 6px 0 #e8567f; transition:transform .1s, box-shadow .1s;
+  }
+  .next-btn:active, .play-btn:active { transform:translateY(4px); box-shadow:0 2px 0 #e8567f; }
+  .ghost-btn {
+    margin-top:14px; font-size:15px; font-family:inherit; color:#b69;
+    background:#fff; border:2px solid #ffd0e0; border-radius:14px;
+    padding:9px 18px; cursor:pointer;
+  }
+  .hidden { display:none; }
+
+  .result-emoji { font-size:78px; margin:8px 0; animation:bob 2s ease-in-out infinite;}
+  .result-title { font-size:28px; color:#ff7aa8; margin-bottom:8px; }
+  .result-score { font-size:22px; color:#6a5a52; margin-bottom:6px; }
+  .result-msg { font-size:17px; color:#8a7a72; margin:14px 0 6px; line-height:1.6; }
+  .stars-row { font-size:34px; margin:10px 0; letter-spacing:4px; }
+
+  @keyframes pop { 0%{transform:scale(0)} 70%{transform:scale(1.3)} 100%{transform:scale(1)} }
+  .pop { animation:pop .4s ease; }
+  @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-7px)} 75%{transform:translateX(7px)} }
+  .shake { animation:shake .35s; }
+</style>
+</head>
+<body>
+<div class="cloud" style="top:8%;left:6%">☁️</div>
+<div class="cloud" style="top:14%;right:8%;animation-delay:1.5s">⛅</div>
+<div class="cloud" style="bottom:10%;left:10%;animation-delay:3s">🌈</div>
+<div class="cloud" style="bottom:16%;right:7%;animation-delay:2s">⭐</div>
+
+<div class="card">
+
+  <!-- 모드 선택 -->
+  <div id="menuScreen">
+    <h1>🐑 어린이 성경퀴즈 🐑</h1>
+    <p class="subtitle">어떤 퀴즈에 도전해 볼까요?</p>
+    <div class="mode-list">
+      <button class="mode-btn m-book" onclick="showBookPicker()">
+        <span class="big">📖</span><span>성경책 골라서 풀기<span class="mode-sub">책을 고르면 그 책 문제가 나와요!</span></span></button>
+      <button class="mode-btn m-yu"  onclick="startQuiz('yu')">
+        <span class="big">🧸</span><span>유치부 퀴즈<span class="mode-sub">쉬워요! (5~7세)</span></span></button>
+      <button class="mode-btn m-cho" onclick="startQuiz('cho')">
+        <span class="big">🎒</span><span>초등부 퀴즈<span class="mode-sub">조금 어려워요! (8~13세)</span></span></button>
+    </div>
+  </div>
+
+  <!-- 성경책 고르기 -->
+  <div id="bookScreen" class="hidden">
+    <h1>📖 성경책 고르기</h1>
+    <p class="subtitle">풀고 싶은 책을 눌러보세요!</p>
+    <div id="bookGridOld"></div>
+    <div id="bookGridNew"></div>
+    <button class="ghost-btn" onclick="toMenu()">🏠 메뉴로</button>
+  </div>
+
+  <!-- 퀴즈 -->
+  <div id="quizScreen" class="hidden">
+    <div class="quiz-head">
+      <div class="quiz-title" id="quizTitle"></div>
+      <button class="exit-btn" onclick="toMenu()">✕ 그만하기</button>
+    </div>
+    <div class="topbar">
+      <span id="qCounter">1 / 10</span>
+      <span class="star-score">⭐ <span id="score">0</span></span>
+    </div>
+    <div class="progress-wrap"><div class="progress-bar" id="progressBar"></div></div>
+    <div class="mascot" id="mascot">🐑</div>
+    <div class="question" id="questionBox"></div>
+    <div class="options" id="optionsBox"></div>
+    <div class="feedback" id="feedback"></div>
+    <button class="next-btn hidden" id="nextBtn" onclick="nextQuestion()">다음 문제 ▶</button>
+  </div>
+
+  <!-- 결과 -->
+  <div id="resultScreen" class="hidden">
+    <div class="result-emoji" id="resultEmoji">🎉</div>
+    <div class="result-title" id="resultTitle">참 잘했어요!</div>
+    <div class="stars-row" id="starsRow"></div>
+    <div class="result-score">획득한 별: <b id="finalScore">0</b> / <span id="finalTotal">10</span> ⭐</div>
+    <div class="result-msg" id="resultMsg"></div>
+    <button class="play-btn" onclick="restart()">🔄 다시 도전</button><br>
+    <button class="ghost-btn" onclick="toMenu()">🏠 메뉴로</button>
+  </div>
+
+</div>
+
+<script>
+/* ===================== 책별 퀴즈 데이터 =====================
+   ※ 각 문제는 정답을 options[0]에 두고 answer:0 으로 적습니다.
+     게임을 시작할 때 보기 순서를 무작위로 섞기 때문에
+     매번 정답 위치가 달라지고, 많은 문제 중 일부만 뽑아 출제합니다. */
+const BOOK_QUIZZES = {
+  "창세기":{emoji:"🌍",testament:"old",qs:[
+    {q:"하나님이 세상을 만드신 날은 모두 며칠일까요?",options:["6일","100일","1일","30일"],answer:0,explain:"6일 동안 만드시고 7일째 쉬셨어요."},
+    {q:"하나님이 가장 먼저 '있으라' 하신 것은 무엇일까요?",options:["빛","바다","사람","나무"],answer:0,explain:"첫째 날 '빛이 있으라' 하셨어요."},
+    {q:"에덴동산에 살던 첫 번째 사람은 누구일까요?",options:["아담","노아","요셉","모세"],answer:0,explain:"아담과 하와가 첫 사람이었어요."},
+    {q:"하나님이 아담을 잠들게 하고 무엇으로 하와를 만드셨을까요?",options:["갈빗대","흙","물","나뭇잎"],answer:0,explain:"아담의 갈빗대로 하와를 만드셨어요."},
+    {q:"큰 배(방주)를 만들어 홍수에서 가족을 구한 사람은?",options:["노아","아브라함","이삭","야곱"],answer:0,explain:"노아는 하나님 말씀에 순종했어요."},
+    {q:"노아 때 비가 며칠 동안 내렸을까요?",options:["40일","3일","7일","100일"],answer:0,explain:"밤낮 40일 동안 비가 내렸어요."},
+    {q:"홍수 후 하나님이 약속의 표로 주신 것은 무엇일까요?",options:["무지개","번개","별","눈"],answer:0,explain:"무지개는 다시 물로 심판 안 하신다는 약속이에요."},
+    {q:"믿음의 조상이라 불리는 사람은 누구일까요?",options:["아브라함","사울","다윗","엘리야"],answer:0,explain:"아브라함은 하나님을 믿고 따랐어요."},
+    {q:"형들에게 팔려갔지만 애굽의 총리가 된 사람은?",options:["요셉","유다","베냐민","르우벤"],answer:0,explain:"요셉은 꿈을 꾸고 애굽 총리가 됐어요."},
+    {q:"아버지가 요셉에게 지어 입힌 특별한 옷은?",options:["채색옷","왕관","갑옷","신발"],answer:0,explain:"요셉은 아름다운 채색옷을 받았어요."},
+    {q:"높이 쌓다가 하나님이 언어를 흩으신 탑의 이름은?",options:["바벨탑","피라미드","성전","등대"],answer:0,explain:"교만하게 쌓던 바벨탑이에요."}
+  ]},
+  "출애굽기":{emoji:"🌊",testament:"old",qs:[
+    {q:"갈대상자에 담겨 강에 떠내려간 아기는 누구일까요?",options:["모세","아론","여호수아","갈렙"],answer:0,explain:"공주가 아기 모세를 건져 길렀어요."},
+    {q:"하나님이 모세를 부르실 때 타지 않고 불붙은 것은?",options:["떨기나무","바위","구름","물"],answer:0,explain:"불붙은 떨기나무에서 말씀하셨어요."},
+    {q:"하나님이 애굽에 내리신 재앙은 모두 몇 가지일까요?",options:["열 가지","세 가지","다섯 가지","백 가지"],answer:0,explain:"열 가지 재앙 후 백성이 나왔어요."},
+    {q:"이스라엘 백성을 이끌고 홍해를 건넌 사람은?",options:["모세","베드로","바울","요나"],answer:0,explain:"모세가 지팡이를 들자 바다가 갈라졌어요."},
+    {q:"모세의 형이자 함께 일한 사람은 누구일까요?",options:["아론","갈렙","여호수아","사무엘"],answer:0,explain:"형 아론이 모세를 도왔어요."},
+    {q:"하나님이 모세에게 주신 열 가지 규칙을 무엇이라 할까요?",options:["십계명","주기도문","시편","팔복"],answer:0,explain:"시내산에서 십계명을 받았어요."},
+    {q:"십계명을 받은 산의 이름은 무엇일까요?",options:["시내산","갈멜산","감람산","시온산"],answer:0,explain:"시내산에서 받았어요."},
+    {q:"광야에서 하늘에서 내려준 양식의 이름은?",options:["만나","떡","포도","사과"],answer:0,explain:"만나는 매일 아침 내려온 양식이에요."}
+  ]},
+  "여호수아":{emoji:"🏛️",testament:"old",qs:[
+    {q:"이스라엘이 외치고 돌자 무너진 성은 어디일까요?",options:["여리고성","바벨탑","예루살렘","니느웨"],answer:0,explain:"여리고성이 큰 소리에 무너졌어요."},
+    {q:"모세 다음으로 백성을 이끈 지도자는 누구일까요?",options:["여호수아","갈렙","사무엘","사울"],answer:0,explain:"여호수아가 가나안 땅으로 이끌었어요."},
+    {q:"여리고성을 며칠째에 일곱 바퀴 돌았을까요?",options:["7일째","1일째","3일째","40일째"],answer:0,explain:"7일째 일곱 바퀴 돌고 외쳤어요."},
+    {q:"백성이 마른 땅으로 건넌 강의 이름은 무엇일까요?",options:["요단강","홍해","나일강","갈릴리 바다"],answer:0,explain:"요단강이 갈라져 마른 땅으로 건넜어요."},
+    {q:"'오직 나와 내 집은 ○○를 섬기겠노라'에서 ○○는?",options:["여호와","왕","우상","사람"],answer:0,explain:"여호수아의 유명한 고백이에요."}
+  ]},
+  "사사기":{emoji:"💪",testament:"old",qs:[
+    {q:"머리카락에 큰 힘이 있던 장사는 누구일까요?",options:["삼손","기드온","바락","입다"],answer:0,explain:"삼손은 하나님이 주신 힘을 가졌어요."},
+    {q:"삼손의 힘의 비밀을 알아내려 한 여인은?",options:["들릴라","드보라","룻","한나"],answer:0,explain:"들릴라가 삼손을 꾀었어요."},
+    {q:"단 300명의 용사로 미디안을 이긴 사사는?",options:["기드온","삼손","에훗","옷니엘"],answer:0,explain:"기드온은 적은 군사로 크게 이겼어요."},
+    {q:"이스라엘을 다스린 지혜로운 여자 사사는 누구일까요?",options:["드보라","미리암","에스더","나오미"],answer:0,explain:"드보라는 여자 사사이자 재판관이었어요."},
+    {q:"삼손의 힘은 무엇과 관련이 있었을까요?",options:["머리카락","손","눈","발"],answer:0,explain:"머리카락을 자르자 힘이 빠졌어요."}
+  ]},
+  "룻기":{emoji:"🌾",testament:"old",qs:[
+    {q:"끝까지 시어머니를 따라간 효성스러운 며느리는?",options:["룻","한나","에스더","미리암"],answer:0,explain:"룻기의 주인공 룻이에요."},
+    {q:"룻이 따라간 시어머니의 이름은 무엇일까요?",options:["나오미","사라","리브가","라헬"],answer:0,explain:"나오미를 끝까지 떠나지 않았어요."},
+    {q:"룻과 결혼한 착한 밭 주인은 누구일까요?",options:["보아스","엘리","사무엘","나단"],answer:0,explain:"보아스는 룻에게 친절했어요."},
+    {q:"룻이 이삭을 주운 곳은 어디일까요?",options:["보리밭","포도밭","사과밭","우물"],answer:0,explain:"보아스의 보리밭에서 이삭을 주웠어요."}
+  ]},
+  "사무엘상":{emoji:"🪨",testament:"old",qs:[
+    {q:"물맷돌로 거인 골리앗을 이긴 소년은 누구일까요?",options:["다윗","사울","요나단","사무엘"],answer:0,explain:"다윗은 믿음으로 거인을 이겼어요."},
+    {q:"다윗이 골리앗을 이길 때 사용한 무기는?",options:["물맷돌","칼","활","창"],answer:0,explain:"작은 돌멩이와 물매로 이겼어요."},
+    {q:"골리앗은 어느 나라의 거인 장수였을까요?",options:["블레셋","애굽","앗수르","바벨론"],answer:0,explain:"블레셋의 거인 골리앗이에요."},
+    {q:"이스라엘의 첫 번째 왕은 누구일까요?",options:["사울","다윗","솔로몬","사무엘"],answer:0,explain:"사울이 첫 왕이 되었어요."},
+    {q:"기도로 얻은 아들을 하나님께 드린 어머니는?",options:["한나","나오미","룻","드보라"],answer:0,explain:"한나의 아들이 사무엘이에요."},
+    {q:"어린 사무엘이 밤에 들은 음성은 누구의 음성이었을까요?",options:["하나님","엘리","사울","어머니"],answer:0,explain:"'사무엘아' 부르신 하나님 음성이에요."}
+  ]},
+  "열왕기상":{emoji:"👑",testament:"old",qs:[
+    {q:"하나님께 지혜를 구해 지혜로운 왕이 된 사람은?",options:["솔로몬","다윗","사울","르호보암"],answer:0,explain:"솔로몬은 부귀 대신 지혜를 구했어요."},
+    {q:"솔로몬이 하나님을 위해 예루살렘에 지은 것은?",options:["성전","궁궐","성벽","다리"],answer:0,explain:"아름다운 성전을 지었어요."},
+    {q:"까마귀가 떡과 고기를 날라다 먹인 예언자는?",options:["엘리야","엘리사","이사야","요나"],answer:0,explain:"엘리야를 까마귀가 먹였어요."},
+    {q:"갈멜산에서 바알 선지자와 대결해 이긴 예언자는?",options:["엘리야","예레미야","다니엘","에스겔"],answer:0,explain:"엘리야의 제단에 하늘 불이 내렸어요."},
+    {q:"두 어머니가 한 아기를 두고 다툴 때 지혜로 판결한 왕은?",options:["솔로몬","다윗","히스기야","요시야"],answer:0,explain:"솔로몬의 지혜로운 재판이에요."}
+  ]},
+  "느헤미야":{emoji:"🧱",testament:"old",qs:[
+    {q:"무너진 예루살렘 성벽을 다시 쌓은 사람은 누구일까요?",options:["느헤미야","에스라","다니엘","에스더"],answer:0,explain:"느헤미야가 백성과 함께 성벽을 쌓았어요."},
+    {q:"느헤미야와 백성은 성벽을 며칠 만에 다 쌓았을까요?",options:["52일","1년","3일","100일"],answer:0,explain:"놀랍게도 52일 만에 완성했어요."},
+    {q:"성벽을 쌓을 때 가장 먼저 한 일은 무엇일까요?",options:["기도","잠자기","싸움","노래"],answer:0,explain:"느헤미야는 먼저 하나님께 기도했어요."}
+  ]},
+  "에스더":{emoji:"👸",testament:"old",qs:[
+    {q:"왕비가 되어 자기 민족을 구한 용감한 여인은?",options:["에스더","룻","한나","사라"],answer:0,explain:"에스더는 목숨 걸고 백성을 구했어요."},
+    {q:"유대인을 해치려 한 악한 신하의 이름은?",options:["하만","고라","골리앗","바로"],answer:0,explain:"하만의 계획은 결국 실패했어요."},
+    {q:"에스더를 키워준 사촌 오빠의 이름은 무엇일까요?",options:["모르드개","느헤미야","에스라","다니엘"],answer:0,explain:"모르드개가 에스더를 돌봤어요."}
+  ]},
+  "시편":{emoji:"🎵",testament:"old",qs:[
+    {q:"'여호와는 나의 ○○이시니'에서 ○○는 무엇일까요?",options:["목자","왕","친구","빛"],answer:0,explain:"시편 23편의 유명한 말씀이에요."},
+    {q:"시편을 많이 지은 것으로 유명한 왕은 누구일까요?",options:["다윗","솔로몬","사울","히스기야"],answer:0,explain:"다윗은 찬양의 노래를 많이 지었어요."},
+    {q:"시편은 주로 하나님께 드리는 무엇일까요?",options:["찬양과 기도","역사책","편지","규칙"],answer:0,explain:"시편은 찬양과 기도의 노래예요."}
+  ]},
+  "잠언":{emoji:"💡",testament:"old",qs:[
+    {q:"지혜의 말씀이 가득한 이 책을 주로 쓴 지혜로운 왕은?",options:["솔로몬","다윗","사울","요시야"],answer:0,explain:"솔로몬은 하나님께 지혜를 구했어요."},
+    {q:"'여호와를 ○○하는 것이 지식의 근본'에서 ○○는?",options:["경외","미워","구경","걱정"],answer:0,explain:"하나님을 공경하는 것이 지혜의 시작이에요."},
+    {q:"잠언은 우리에게 무엇을 가르쳐 주는 책일까요?",options:["지혜","요리","숫자","노래"],answer:0,explain:"바르고 지혜롭게 사는 법을 알려줘요."}
+  ]},
+  "다니엘":{emoji:"🦁",testament:"old",qs:[
+    {q:"사자 굴에 던져졌지만 하나님이 지켜주신 사람은?",options:["다니엘","요나","엘리야","에스더"],answer:0,explain:"사자들이 입을 다물어 안전했어요."},
+    {q:"뜨거운 풀무불에 들어가도 타지 않은 세 친구가 있던 책은?",options:["다니엘","창세기","룻기","요나"],answer:0,explain:"사드락·메삭·아벳느고 이야기예요."},
+    {q:"다니엘이 왕의 음식 대신 먹기로 한 것은?",options:["채소와 물","고기와 술","빵과 꿀","과자"],answer:0,explain:"몸을 깨끗이 지키려 채소와 물을 먹었어요."},
+    {q:"다니엘은 하루에 몇 번씩 기도했을까요?",options:["세 번","한 번","열 번","안 했어요"],answer:0,explain:"하루 세 번 창을 열고 기도했어요."},
+    {q:"풀무불에 함께 들어간 세 친구가 아닌 사람은?",options:["다리오","사드락","메삭","아벳느고"],answer:0,explain:"세 친구는 사드락·메삭·아벳느고예요."}
+  ]},
+  "요나":{emoji:"🐋",testament:"old",qs:[
+    {q:"큰 물고기 배 속에 들어갔던 사람은 누구일까요?",options:["요나","베드로","바울","다윗"],answer:0,explain:"요나는 물고기 배 속에서 회개했어요."},
+    {q:"요나는 물고기 배 속에서 며칠을 지냈을까요?",options:["3일","1일","7일","40일"],answer:0,explain:"삼 일 밤낮을 지냈어요."},
+    {q:"하나님이 요나에게 가라고 하신 도시는 어디일까요?",options:["니느웨","애굽","바벨론","로마"],answer:0,explain:"니느웨에 회개를 전하라 하셨어요."},
+    {q:"요나는 하나님 말씀을 피해 어디로 도망치려 했을까요?",options:["배를 타고 바다로","산으로","사막으로","집으로"],answer:0,explain:"다시스로 가는 배를 탔어요."}
+  ]},
+  "민수기":{emoji:"🐍",testament:"old",qs:[
+    {q:"이스라엘 백성이 광야에서 몇 년 동안 지냈을까요?",options:["40년","4년","100년","1년"],answer:0,explain:"광야에서 40년을 지냈어요."},
+    {q:"모세가 장대에 매단 것을 쳐다본 사람이 살았는데, 그것은?",options:["놋뱀","칼","빵","등불"],answer:0,explain:"놋뱀을 본 사람은 살아났어요."},
+    {q:"가나안 땅을 정탐하고 믿음으로 보고한 두 사람은?",options:["여호수아와 갈렙","모세와 아론","사울과 다윗","베드로와 요한"],answer:0,explain:"여호수아와 갈렙만 믿음으로 보고했어요."},
+    {q:"발람을 막으려고 하나님이 말하게 하신 동물은?",options:["나귀","사자","양","비둘기"],answer:0,explain:"나귀가 사람처럼 말했어요."}
+  ]},
+  "사무엘하":{emoji:"🎺",testament:"old",qs:[
+    {q:"골리앗을 이긴 후 이스라엘의 위대한 왕이 된 사람은?",options:["다윗","사울","솔로몬","요나단"],answer:0,explain:"다윗이 이스라엘의 왕이 되었어요."},
+    {q:"다윗이 나라의 수도로 삼은 성은 어디일까요?",options:["예루살렘","베들레헴","여리고","애굽"],answer:0,explain:"다윗은 예루살렘을 수도로 삼았어요."},
+    {q:"다윗은 언약궤를 옮기며 기뻐서 무엇을 했을까요?",options:["춤을 췄어요","울었어요","잠을 잤어요","숨었어요"],answer:0,explain:"다윗은 온 힘을 다해 춤추며 기뻐했어요."},
+    {q:"하나님은 다윗에게 그의 무엇이 영원하리라 약속하셨을까요?",options:["나라(왕위)","집","밭","보물"],answer:0,explain:"다윗의 나라가 영원하리라 약속하셨어요."}
+  ]},
+  "열왕기하":{emoji:"🌀",testament:"old",qs:[
+    {q:"엘리야의 뒤를 이어 예언자가 된 사람은 누구일까요?",options:["엘리사","이사야","예레미야","다니엘"],answer:0,explain:"엘리사가 엘리야의 뒤를 이었어요."},
+    {q:"엘리야는 마지막에 어떻게 하늘로 올라갔을까요?",options:["불수레와 회오리바람","사다리","구름","배"],answer:0,explain:"불수레와 회오리바람으로 올라갔어요."},
+    {q:"요단강에 일곱 번 씻고 나병이 나은 장군의 이름은?",options:["나아만","골리앗","느부갓네살","바로"],answer:0,explain:"나아만 장군이 깨끗이 나았어요."},
+    {q:"나아만은 요단강에 몇 번 몸을 씻었을까요?",options:["일곱 번","한 번","세 번","열 번"],answer:0,explain:"순종하여 일곱 번 씻자 나았어요."}
+  ]},
+  "이사야":{emoji:"🌟",testament:"old",qs:[
+    {q:"이사야가 미리 전한, 우리에게 나실 분은 누구일까요?",options:["구원자(메시아)","왕자","장군","상인"],answer:0,explain:"예수님이 오실 것을 미리 전했어요."},
+    {q:"'하나님이 우리와 함께 계시다'라는 뜻의 이름은?",options:["임마누엘","베들레헴","할렐루야","호산나"],answer:0,explain:"임마누엘은 '하나님이 함께 계심'이에요."},
+    {q:"이사야처럼 하나님 말씀을 전하는 사람을 무엇이라 할까요?",options:["예언자(선지자)","제사장","왕","군인"],answer:0,explain:"이사야는 하나님의 예언자였어요."}
+  ]},
+  "마태복음":{emoji:"⭐",testament:"new",qs:[
+    {q:"아기 예수님은 어느 마을에서 태어나셨을까요?",options:["베들레헴","나사렛","예루살렘","갈릴리"],answer:0,explain:"예수님은 베들레헴에서 태어나셨어요."},
+    {q:"동방박사들을 아기 예수님께 인도한 것은 무엇일까요?",options:["큰 별","천사","비둘기","바람"],answer:0,explain:"하늘의 큰 별이 길을 알려줬어요."},
+    {q:"동방박사들이 아기 예수님께 드린 예물이 아닌 것은?",options:["사과","황금","유향","몰약"],answer:0,explain:"황금·유향·몰약을 선물로 드렸어요."},
+    {q:"예수님이 산 위에서 가르치신 복된 말씀을 무엇이라 할까요?",options:["산상수훈(팔복)","십계명","창조 이야기","족보"],answer:0,explain:"'마음이 가난한 자는 복이 있다' 하셨어요."},
+    {q:"요단강에서 예수님께 세례를 베푼 사람은 누구일까요?",options:["세례 요한","베드로","바울","야고보"],answer:0,explain:"세례 요한이 예수님께 세례를 주었어요."},
+    {q:"예수님이 광야에서 며칠 동안 금식하며 시험을 이기셨을까요?",options:["40일","3일","7일","1일"],answer:0,explain:"사십 일 금식 후 마귀를 이기셨어요."}
+  ]},
+  "마가복음":{emoji:"⛵",testament:"new",qs:[
+    {q:"예수님이 말씀 한마디로 잔잔하게 하신 것은 무엇일까요?",options:["바다 풍랑","불","해와 달","비"],answer:0,explain:"'잠잠하라' 하시자 풍랑이 멈췄어요."},
+    {q:"예수님이 함께 다니며 가르치신 가까운 제자는 모두 몇 명?",options:["열두 명","세 명","일곱 명","백 명"],answer:0,explain:"예수님께는 열두 제자가 있었어요."},
+    {q:"예수님이 어린아이들을 어떻게 대하셨을까요?",options:["안아 축복하셨어요","돌려보내셨어요","꾸짖으셨어요","모르는 척하셨어요"],answer:0,explain:"'어린아이를 막지 말라' 하시며 축복하셨어요."},
+    {q:"손을 대어 많은 병든 사람을 어떻게 하셨을까요?",options:["고쳐 주셨어요","혼내셨어요","숨으셨어요","무시하셨어요"],answer:0,explain:"예수님은 병든 사람을 고쳐 주셨어요."}
+  ]},
+  "누가복음":{emoji:"🐑",testament:"new",qs:[
+    {q:"집을 떠났다가 아버지께 돌아온 아들의 비유 이름은?",options:["탕자(잃은 아들)","선한 왕","부자와 거지","씨 뿌리는 자"],answer:0,explain:"아버지는 돌아온 아들을 기쁘게 맞았어요."},
+    {q:"강도 만난 사람을 도와준 착한 사람을 무엇이라 부를까요?",options:["선한 사마리아인","제사장","레위인","바리새인"],answer:0,explain:"이웃을 사랑하라는 비유예요."},
+    {q:"태어난 아기 예수님을 뉘인 곳은 어디일까요?",options:["구유(말 밥통)","침대","요람","배"],answer:0,explain:"방이 없어 구유에 뉘셨어요."},
+    {q:"아기 예수님 탄생 소식을 천사에게 처음 들은 사람들은?",options:["목자들","왕들","군인들","상인들"],answer:0,explain:"들에서 양 치던 목자들이 들었어요."},
+    {q:"길 잃은 한 마리 양을 끝까지 찾는 비유의 주인은 누구일까요?",options:["목자","농부","어부","왕"],answer:0,explain:"잃은 양 한 마리를 찾는 목자 비유예요."}
+  ]},
+  "요한복음":{emoji:"🍇",testament:"new",qs:[
+    {q:"예수님이 가나 혼인잔치에서 물로 만드신 것은?",options:["포도주","빵","꿀","우유"],answer:0,explain:"예수님의 첫 번째 기적이에요."},
+    {q:"예수님이 무덤에서 다시 살리신 친구의 이름은?",options:["나사로","베드로","요한","도마"],answer:0,explain:"'나사로야 나오라' 하시자 살아났어요."},
+    {q:"'나는 ○○이요 진리요 생명이니'에서 ○○는 무엇일까요?",options:["길","문","빛","떡"],answer:0,explain:"예수님은 하나님께 가는 길이에요."},
+    {q:"빵 다섯 개와 물고기 두 마리로 먹이신 사람은 약 몇 명?",options:["5000명","100명","500명","50명"],answer:0,explain:"오병이어 기적으로 5000명을 먹이셨어요."},
+    {q:"'나는 선한 ○○라'에서 ○○는 무엇일까요?",options:["목자","농부","어부","왕"],answer:0,explain:"예수님은 우리를 돌보는 선한 목자세요."}
+  ]},
+  "사도행전":{emoji:"🔥",testament:"new",qs:[
+    {q:"오순절에 제자들에게 임하신 분은 누구일까요?",options:["성령","천사","선지자","왕"],answer:0,explain:"성령이 불처럼 임하셨어요."},
+    {q:"교회를 핍박하다 다메섹 길에서 변화된 사람은?",options:["바울(사울)","베드로","빌립","마가"],answer:0,explain:"바울은 큰 빛을 만나 변했어요."},
+    {q:"믿음을 지키다 처음으로 순교한 제자는 누구일까요?",options:["스데반","유다","도마","마태"],answer:0,explain:"스데반은 끝까지 예수님을 전했어요."},
+    {q:"감옥에서 찬송하던 바울과 실라를 풀어준 사건은?",options:["큰 지진","큰 비","큰 바람","큰 불"],answer:0,explain:"지진으로 옥문이 열렸어요."},
+    {q:"예수님의 제자들이 처음으로 '그리스도인'이라 불린 곳은?",options:["안디옥","예루살렘","로마","애굽"],answer:0,explain:"안디옥에서 처음 그리스도인이라 불렸어요."}
+  ]},
+  "고린도전서":{emoji:"💕",testament:"new",qs:[
+    {q:"믿음, 소망, 사랑 중에서 제일은 무엇이라고 했을까요?",options:["사랑","믿음","소망","지혜"],answer:0,explain:"그중에 제일은 사랑이에요."},
+    {q:"'사랑은 오래 ○○고 사랑은 온유하며'에서 ○○는?",options:["참","웃","자","뛰"],answer:0,explain:"사랑은 오래 참아요. (고린도전서 13장)"},
+    {q:"사랑을 아름답게 노래한 유명한 장은 몇 장일까요?",options:["13장","1장","100장","5장"],answer:0,explain:"고린도전서 13장은 '사랑장'이에요."}
+  ]},
+  "빌립보서":{emoji:"😊",testament:"new",qs:[
+    {q:"'주 안에서 항상 ○○하라'에서 ○○는 무엇일까요?",options:["기뻐","화내","걱정","미워"],answer:0,explain:"항상 기뻐하라고 하셨어요."},
+    {q:"'내게 능력 주시는 자 안에서 내가 모든 것을 할 수 있느니라'를 쓴 사람은?",options:["바울","베드로","요한","누가"],answer:0,explain:"바울이 감옥에서 쓴 말씀이에요."},
+    {q:"바울은 이 편지를 어디에서 썼을까요?",options:["감옥","궁궐","배 안","산 위"],answer:0,explain:"감옥에서도 기뻐하며 편지를 썼어요."}
+  ]},
+  "요한일서":{emoji:"❤️",testament:"new",qs:[
+    {q:"'하나님은 ○○이심이라'에서 ○○는 무엇일까요?",options:["사랑","빛만","왕","바람"],answer:0,explain:"하나님은 사랑이세요."},
+    {q:"하나님을 사랑하는 사람은 서로 무엇을 해야 할까요?",options:["사랑","미움","경쟁","무시"],answer:0,explain:"서로 사랑하라고 하셨어요."},
+    {q:"우리가 잘못을 정직하게 말하면 하나님은 어떻게 하실까요?",options:["용서해 주세요","화내세요","외면하세요","벌만 주세요"],answer:0,explain:"자백하면 깨끗이 용서해 주세요."}
+  ]},
+  "요한계시록":{emoji:"🌅",testament:"new",qs:[
+    {q:"성경의 가장 마지막 책의 이름은 무엇일까요?",options:["요한계시록","말라기","사도행전","유다서"],answer:0,explain:"요한계시록이 성경 맨 마지막 책이에요."},
+    {q:"천국(새 하늘과 새 땅)에는 무엇이 없다고 했을까요?",options:["눈물과 아픔","꽃","빛","노래"],answer:0,explain:"눈물도 아픔도 죽음도 없는 곳이에요."},
+    {q:"이 책은 예수님이 어떻게 하신다는 약속을 담고 있을까요?",options:["다시 오심","사라지심","주무심","숨으심"],answer:0,explain:"예수님이 다시 오신다는 소망의 약속이에요."}
+  ]}
+};
+
+/* ===================== 유치부/초등부 ===================== */
+const YU = [
+  {emoji:"🌍",q:"하나님이 세상을 만드신 날은 모두 며칠일까요?",options:["6일","100일"],answer:0,explain:"6일 동안 만드시고 7일째 쉬셨어요."},
+  {emoji:"🚢",q:"큰 배(방주)를 만든 사람은 누구일까요?",options:["노아","다윗"],answer:0,explain:"노아는 하나님 말씀에 순종했어요."},
+  {emoji:"👶",q:"아기 예수님이 태어난 곳은 어디일까요?",options:["마구간","궁궐"],answer:0,explain:"베들레헴의 작은 마구간에서 태어나셨어요."},
+  {emoji:"🐑",q:"예수님은 우리를 무엇처럼 돌보시는 착한 목자일까요?",options:["양","사자"],answer:0,explain:"예수님은 우리를 양처럼 사랑으로 돌보세요."},
+  {emoji:"🙏",q:"하나님께 마음을 이야기하는 것을 무엇이라 할까요?",options:["기도","노래"],answer:0,explain:"기도는 하나님과 이야기하는 거예요."},
+  {emoji:"📖",q:"하나님 말씀이 적힌 책의 이름은 무엇일까요?",options:["성경","동화책"],answer:0,explain:"성경은 하나님이 주신 소중한 책이에요."},
+  {emoji:"🍎",q:"에덴동산에 살던 첫 번째 사람은 누구일까요?",options:["아담","요나"],answer:0,explain:"아담과 하와가 첫 사람이었어요."},
+  {emoji:"⭐",q:"동방박사를 아기 예수님께 데려간 것은 무엇일까요?",options:["큰 별","바람"],answer:0,explain:"하늘의 큰 별이 길을 알려줬어요."},
+  {emoji:"🌊",q:"홍해를 갈라 백성을 건너게 한 사람은 누구일까요?",options:["모세","베드로"],answer:0,explain:"모세가 지팡이를 들자 바다가 갈라졌어요."},
+  {emoji:"🐋",q:"큰 물고기 배 속에 들어갔던 사람은 누구일까요?",options:["요나","솔로몬"],answer:0,explain:"요나는 물고기 배 속에서 회개했어요."},
+  {emoji:"❤️",q:"하나님은 우리를 어떻게 생각하실까요?",options:["많이 사랑하세요","미워하세요"],answer:0,explain:"하나님은 우리를 아주 많이 사랑하세요."},
+  {emoji:"🕊️",q:"노아의 방주에서 땅을 찾으러 날아간 새는?",options:["비둘기","독수리"],answer:0,explain:"비둘기가 잎사귀를 물고 돌아왔어요."},
+  {emoji:"🪨",q:"물맷돌로 골리앗을 이긴 소년은 누구일까요?",options:["다윗","사울"],answer:0,explain:"다윗은 작은 돌과 믿음으로 이겼어요."},
+  {emoji:"🦁",q:"사자 굴에서 하나님이 지켜주신 사람은 누구일까요?",options:["다니엘","요셉"],answer:0,explain:"사자들이 입을 다물어 안전했어요."}
+];
+const CHO = [
+  {emoji:"🌍",q:"하나님이 세상을 만드신 날은 모두 며칠일까요?",options:["6일","3일","10일","30일"],answer:0,explain:"6일 동안 만드시고 7일째 쉬셨어요."},
+  {emoji:"🪨",q:"물맷돌로 거인 골리앗을 이긴 소년은 누구일까요?",options:["다윗","사울","솔로몬","삼손"],answer:0,explain:"다윗은 작은 돌과 믿음으로 이겼어요."},
+  {emoji:"🍞",q:"빵 다섯 개와 물고기 두 마리로 먹이신 사람은 약 몇 명?",options:["5000명","100명","500명","100만 명"],answer:0,explain:"오병이어 기적으로 5000명을 먹이셨어요."},
+  {emoji:"🦁",q:"사자 굴에 던져졌지만 하나님이 지켜주신 사람은?",options:["다니엘","에스더","느헤미야","엘리야"],answer:0,explain:"다니엘은 사자 굴에서도 안전했어요."},
+  {emoji:"💪",q:"머리카락에 큰 힘이 있던 사사(장사)는 누구일까요?",options:["삼손","기드온","여호수아","갈렙"],answer:0,explain:"삼손은 하나님이 주신 힘을 가졌어요."},
+  {emoji:"👑",q:"지혜를 구해 지혜로운 왕이 된 사람은 누구일까요?",options:["솔로몬","다윗","사울","히스기야"],answer:0,explain:"솔로몬은 지혜를 구해 받았어요."},
+  {emoji:"🔥",q:"갈멜산에서 바알 선지자와 대결한 예언자는?",options:["엘리야","이사야","예레미야","요엘"],answer:0,explain:"엘리야의 제단에 하늘 불이 내렸어요."},
+  {emoji:"👶",q:"아기 예수님은 어느 마을에서 태어나셨을까요?",options:["베들레헴","예루살렘","나사렛","애굽"],answer:0,explain:"예수님은 베들레헴에서 태어나셨어요."},
+  {emoji:"🙏",q:"예수님의 열두 제자가 아닌 사람은 누구일까요?",options:["모세","베드로","요한","야고보"],answer:0,explain:"모세는 훨씬 옛날 지도자예요."},
+  {emoji:"🌈",q:"홍수 후 하나님이 주신 약속의 표는 무엇일까요?",options:["무지개","번개","별","바람"],answer:0,explain:"무지개는 하나님의 약속이에요."},
+  {emoji:"✉️",q:"교회를 핍박하다 변하여 많은 편지를 쓴 사도는?",options:["바울","베드로","빌립","마가"],answer:0,explain:"바울은 신약의 여러 편지를 썼어요."},
+  {emoji:"🌾",q:"시어머니 나오미를 따라간 효성스러운 며느리는?",options:["룻","한나","미리암","드보라"],answer:0,explain:"룻기의 주인공 룻이에요."},
+  {emoji:"🏛️",q:"여리고성을 무너뜨린 모세 다음 지도자는 누구일까요?",options:["여호수아","모세","갈렙","에스라"],answer:0,explain:"여호수아 때 여리고성이 무너졌어요."},
+  {emoji:"⛪",q:"예수님은 십자가 후 며칠 만에 부활하셨을까요?",options:["3일","1일","7일","40일"],answer:0,explain:"예수님은 사흘 만에 다시 살아나셨어요."},
+  {emoji:"🌟",q:"믿음의 조상이라 불리는 사람은 누구일까요?",options:["아브라함","이삭","야곱","요셉"],answer:0,explain:"아브라함은 믿음의 조상이에요."},
+  {emoji:"👗",q:"왕비가 되어 자기 민족을 구한 용감한 여인은?",options:["에스더","룻","마리아","사라"],answer:0,explain:"에스더는 목숨 걸고 백성을 구했어요."},
+  {emoji:"🧱",q:"무너진 예루살렘 성벽을 다시 쌓은 사람은 누구일까요?",options:["느헤미야","에스라","다니엘","엘리야"],answer:0,explain:"느헤미야가 52일 만에 성벽을 쌓았어요."},
+  {emoji:"🐋",q:"하나님이 요나에게 가라고 하신 도시는 어디일까요?",options:["니느웨","로마","바벨론","애굽"],answer:0,explain:"니느웨 사람들에게 회개를 전하라 하셨어요."}
+];
+
+/* ===================== 공통 함수 ===================== */
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+// 보기 순서를 섞고 정답 위치를 다시 계산 → 매번 정답 자리가 달라짐
+function prep(item){
+  const correctText=item.options[item.answer];
+  const opts=shuffle(item.options);
+  return {...item, options:opts, answer:opts.indexOf(correctText)};
+}
+// 문제 묶음에서 무작위로 count개만 뽑고 보기까지 섞기
+function drawQuestions(pool, count){
+  return shuffle(pool).slice(0, Math.min(count, pool.length)).map(prep);
+}
+
+/* ===================== 게임 진행 ===================== */
+let questions=[], current=0, score=0, answered=false, curMode='yu', curArg=null;
+const MASCOTS=["🐑","🐰","🐥","🦊","🐨","🐱","🐶","🐻","🦁","🐧","🐤","🐹"];
+const PER_BOOK=8;   // 책별 퀴즈에서 한 번에 낼 문제 수(있는 만큼)
+
+function showBookPicker(){
+  document.getElementById('menuScreen').classList.add('hidden');
+  document.getElementById('bookScreen').classList.remove('hidden');
+  const names=Object.keys(BOOK_QUIZZES);
+  const oldNames=names.filter(n=>BOOK_QUIZZES[n].testament==='old');
+  const newNames=names.filter(n=>BOOK_QUIZZES[n].testament==='new');
+  document.getElementById('bookGridOld').innerHTML=
+    '<div class="sec-title">📜 구약 성경</div><div class="book-grid">'+
+    oldNames.map(n=>`<button class="book-btn" onclick="startBookQuiz('${n}')"><span class="be">${BOOK_QUIZZES[n].emoji}</span>${n}</button>`).join('')+'</div>';
+  document.getElementById('bookGridNew').innerHTML=
+    '<div class="sec-title nt">✝️ 신약 성경</div><div class="book-grid">'+
+    newNames.map(n=>`<button class="book-btn nt" onclick="startBookQuiz('${n}')"><span class="be">${BOOK_QUIZZES[n].emoji}</span>${n}</button>`).join('')+'</div>';
+}
+
+function startBookQuiz(name){
+  curMode='book'; curArg=name;
+  const bk=BOOK_QUIZZES[name];
+  questions=drawQuestions(bk.qs, PER_BOOK).map(o=>({emoji:bk.emoji,...o}));
+  beginQuiz(`📖 ${name} 퀴즈`);
+}
+
+function startQuiz(mode){
+  curMode=mode; curArg=null;
+  let title="";
+  if(mode==='yu'){ questions=drawQuestions(YU,10); title="🧸 유치부 퀴즈"; }
+  else if(mode==='cho'){ questions=drawQuestions(CHO,10); title="🎒 초등부 퀴즈"; }
+  beginQuiz(title);
+}
+
+function beginQuiz(title){
+  current=0; score=0;
+  ['menuScreen','bookScreen','resultScreen'].forEach(id=>document.getElementById(id).classList.add('hidden'));
+  document.getElementById('quizScreen').classList.remove('hidden');
+  document.getElementById('quizTitle').textContent=title;
+  document.getElementById('finalTotal').textContent=questions.length;
+  showQuestion();
+}
+
+function showQuestion(){
+  answered=false;
+  const item=questions[current];
+  document.getElementById('score').textContent=score;
+  document.getElementById('qCounter').textContent=(current+1)+" / "+questions.length;
+  document.getElementById('progressBar').style.width=(current/questions.length*100)+"%";
+  document.getElementById('mascot').textContent=MASCOTS[current%MASCOTS.length];
+  document.getElementById('questionBox').innerHTML='<div><span class="q-emoji">'+item.emoji+'</span>'+item.q+'</div>';
+  const optBox=document.getElementById('optionsBox'); optBox.innerHTML='';
+  item.options.forEach((opt,i)=>{
+    const b=document.createElement('button');
+    b.className='opt'; b.textContent=opt; b.onclick=()=>choose(i,b);
+    optBox.appendChild(b);
+  });
+  const fb=document.getElementById('feedback'); fb.textContent=''; fb.className='feedback';
+  document.getElementById('nextBtn').classList.add('hidden');
+}
+
+function choose(i,btn){
+  if(answered) return; answered=true;
+  const item=questions[current];
+  document.querySelectorAll('.opt').forEach(b=>b.disabled=true);
+  const fb=document.getElementById('feedback');
+  if(i===item.answer){
+    btn.classList.add('correct','pop'); score++;
+    document.getElementById('score').textContent=score;
+    fb.textContent="정답이에요! 🎉 "+item.explain; fb.className='feedback good';
+    beep(true);
+  } else {
+    btn.classList.add('wrong','shake');
+    document.querySelectorAll('.opt')[item.answer].classList.add('correct');
+    fb.textContent="아쉬워요! 😊 정답: "+item.options[item.answer]+". "+item.explain; fb.className='feedback bad';
+    beep(false);
+  }
+  document.getElementById('nextBtn').classList.remove('hidden');
+}
+
+function nextQuestion(){ current++; if(current<questions.length) showQuestion(); else showResult(); }
+
+function showResult(){
+  document.getElementById('quizScreen').classList.add('hidden');
+  document.getElementById('resultScreen').classList.remove('hidden');
+  document.getElementById('finalScore').textContent=score;
+  const total=questions.length, ratio=score/total;
+  let emoji,title,msg,stars;
+  if(ratio===1){ emoji="🏆"; title="완벽해요! 성경박사님!"; msg="모든 문제를 다 맞혔어요! 정말 대단해요! 👏"; stars="⭐⭐⭐"; }
+  else if(ratio>=0.7){ emoji="🎉"; title="참 잘했어요!"; msg="아주 훌륭해요! 조금만 더 하면 성경박사! 😊"; stars="⭐⭐"; }
+  else if(ratio>=0.4){ emoji="🌟"; title="잘했어요!"; msg="좋아요! 다시 도전하면 더 잘할 수 있어요! 💪"; stars="⭐"; }
+  else { emoji="🌱"; title="도전해줘서 고마워요!"; msg="괜찮아요! 또 해보면 점점 잘하게 돼요! 🤗"; stars="🌱"; }
+  document.getElementById('resultEmoji').textContent=emoji;
+  document.getElementById('resultTitle').textContent=title;
+  document.getElementById('resultMsg').textContent=msg;
+  document.getElementById('starsRow').textContent=stars;
+}
+
+function restart(){ if(curMode==='book') startBookQuiz(curArg); else startQuiz(curMode); }
+function toMenu(){
+  ['quizScreen','resultScreen','bookScreen'].forEach(id=>document.getElementById(id).classList.add('hidden'));
+  document.getElementById('menuScreen').classList.remove('hidden');
+}
+
+function beep(good){
+  try{
+    const ctx=new (window.AudioContext||window.webkitAudioContext)();
+    const o=ctx.createOscillator(), g=ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    if(good){ o.type='triangle'; o.frequency.setValueAtTime(660,ctx.currentTime); o.frequency.setValueAtTime(880,ctx.currentTime+0.12); }
+    else { o.type='sine'; o.frequency.value=200; }
+    g.gain.setValueAtTime(0.15,ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.3);
+    o.start(); o.stop(ctx.currentTime+0.3);
+  }catch(e){}
+}
+</script>
+</body>
+</html>
