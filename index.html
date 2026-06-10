@@ -11,7 +11,7 @@
     min-height:100vh;
     background: linear-gradient(135deg,#ffd3e0 0%,#ffe9a8 30%,#a8e6ff 70%,#c4f0d0 100%);
     background-attachment:fixed;
-    display:flex; align-items:center; justify-content:center;
+    display:flex; align-items:flex-start; justify-content:center;
     padding:16px; overflow-x:hidden; color:#5a4a42;
   }
   .cloud { position:fixed; font-size:46px; opacity:.55; animation:float 9s ease-in-out infinite; pointer-events:none; z-index:0;}
@@ -163,7 +163,6 @@
       <span class="star-score">⭐ <span id="score">0</span></span>
     </div>
     <div class="progress-wrap"><div class="progress-bar" id="progressBar"></div></div>
-    <div class="mascot" id="mascot">🐑</div>
     <div class="question" id="questionBox"></div>
     <div class="options" id="optionsBox"></div>
     <div class="feedback" id="feedback"></div>
@@ -461,7 +460,6 @@ function showQuestion(){
   document.getElementById('score').textContent=score;
   document.getElementById('qCounter').textContent=(current+1)+" / "+questions.length;
   document.getElementById('progressBar').style.width=(current/questions.length*100)+"%";
-  document.getElementById('mascot').textContent=MASCOTS[current%MASCOTS.length];
   document.getElementById('questionBox').innerHTML='<div><span class="q-emoji">'+item.emoji+'</span>'+item.q+'</div>';
   const optBox=document.getElementById('optionsBox'); optBox.innerHTML='';
   item.options.forEach((opt,i)=>{
@@ -481,12 +479,12 @@ function choose(i,btn){
   if(i===item.answer){
     btn.classList.add('correct','pop'); score++;
     document.getElementById('score').textContent=score;
-    fb.textContent="정답이에요! 🎉 "+item.explain; fb.className='feedback good';
+    fb.innerHTML="정답이에요! 🎉<br>"+item.explain; fb.className='feedback good';
     beep(true);
   } else {
     btn.classList.add('wrong','shake');
     document.querySelectorAll('.opt')[item.answer].classList.add('correct');
-    fb.textContent="아쉬워요! 😊 정답: "+item.options[item.answer]+". "+item.explain; fb.className='feedback bad';
+    fb.innerHTML="아쉬워요! 😊<br>정답: "+item.options[item.answer]+". "+item.explain; fb.className='feedback bad';
     beep(false);
   }
   document.getElementById('nextBtn').classList.remove('hidden');
