@@ -16,6 +16,8 @@
   }
   body.top { align-items:flex-start; }
   body:not(.top) .card { margin-bottom:18vh; }
+  body.embed { align-items:flex-start; padding-top:10px; }
+  body.embed .card { margin-bottom:0; }
   .cloud { position:fixed; font-size:46px; opacity:.55; animation:float 9s ease-in-out infinite; pointer-events:none; z-index:0;}
   @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-22px)} }
 
@@ -532,6 +534,9 @@ function beep(good){
     o.start(); o.stop(ctx.currentTime+0.3);
   }catch(e){}
 }
+
+// 블로그 등에 iframe으로 끼워졌으면 위쪽 정렬(하단 여백 줄이기)
+if(window.self!==window.top){ document.body.classList.add('embed'); }
 </script>
 </body>
 </html>
